@@ -54,5 +54,5 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --role-arn arn:aws:iam::048723829744:role/PRX-GHA-ServiceRoleForCloudFormation
           aws cloudformation update-termination-protection \
-            --stack-name "$stack_name"
+            --stack-name "$stack_name" \
             --enable-termination-protection
