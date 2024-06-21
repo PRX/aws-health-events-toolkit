@@ -40,13 +40,19 @@ jobs:
       - name: Deploy CloudFormation stack
         run: |
           rm samconfig.toml
+
+          stack_name=health-events-toolkit
+
           sam build && sam deploy \
             --region us-east-2 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --stack-name health-events-toolkit \
+            --stack-name "$stack_name" \
             --resolve-s3 \
             --no-progressbar \
-            --s3-prefix health-events-toolkit \
+            --s3-prefix "$stack_name" \
             --capabilities CAPABILITY_IAM \
             --role-arn arn:aws:iam::048723829744:role/PRX-GHA-ServiceRoleForCloudFormation
+          aws cloudformation update-termination-protection \
+            --stack-name "$stack_name"
+            --enable-termination-protection
