@@ -4,6 +4,51 @@ Transform: AWS::Serverless-2016-10-31
 Description: A collection of utilities that integrate with AWS Health Events
 
 Resources:
+  # This is a sink custom EventBridge event bus. It's intended to exist in one
+  # region in an AWS Organization's management account (or the delegated
+  # administrator account of an organization).
+  #
+  # Once the AWS Health Organizational view has been enabled for the
+  # organization, all health events for all accounts that belong to the
+  # organization will be delivered to AWS Health of the management/delegated
+  # account.
+  # https://docs.aws.amazon.com/health/latest/ug/aggregate-events.html
+  #
+  # AWS Health delivers health events to the default bus in the region where
+  # the event occurs.
+  #
+  # All health events within the management/delegated account (and thus all
+  # health events for the organization) are expected to be sent to this custom
+  # event bus. Thisis done by creating rules on the default event buses in all
+  # regions of the management/delegated account, which forward all AWS Health
+  # events to this bus.
+  #
+  # Any tooling that responds to AWS Health events can subscribe to the
+  # relevant events on this bus.
+  #
+  # This bus should always be called `HealthEvents-sink`, as that is what the
+  # rules on all default buses expect.
+  MgmtSinkEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: HealthEvents-sink
+  MgmtSinkEventBusPolicy:
+    # TODO Should have a Condition to limit this to events sent by events.amazonaws.com
+    # since it's only intended to get events from other event buses, not from
+    # any arbitrary sender
+    Type: AWS::Events::EventBusPolicy
+    Properties:
+      EventBusName: !Ref MgmtSinkEventBus
+      StatementId: AllowEventsToCfnOrgSink
+      Statement:
+        Action: events:PutEvents
+        Condition:
+          StringEquals:
+            aws:ResourceOrgID: ${aws:PrincipalOrgID}
+        Effect: Allow
+        Principal: "*"
+        Resource: !GetAtt MgmtSinkEventBus.Arn
+
   # Watches the default event bus for certain types of health events and sends
   # notifications to Slack. See the Lambda function code for details about
   # which event types are included.
@@ -19,6 +64,7 @@ Resources:
       Events:
         PublicHealthEvent:
           Properties:
+            EventBusName: !Ref MgmtSinkEventBus
             Pattern:
               detail-type:
                 - AWS Health Event
