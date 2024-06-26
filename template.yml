@@ -44,7 +44,7 @@ Resources:
         Action: events:PutEvents
         Condition:
           StringEquals:
-            aws:ResourceOrgID: ${aws:PrincipalOrgID}
+            aws:ResourceAccount: ${aws:PrincipalAccount}
         Effect: Allow
         Principal: "*"
         Resource: !GetAtt MgmtSinkEventBus.Arn
