@@ -2,6 +2,7 @@ import {
   EventBridgeClient,
   PutEventsCommand,
 } from "@aws-sdk/client-eventbridge";
+import accountName from "./accounts.mjs";
 
 const eventbridge = new EventBridgeClient({ apiVersion: "2015-10-07" });
 
@@ -34,6 +35,7 @@ export const handler = async (event) => {
     }),
   );
 
+  const accountId = event.detail.affectedAccount;
   const region = event.detail.eventRegion;
   const { service } = event.detail;
   const code = event.detail.eventTypeCode;
@@ -68,6 +70,7 @@ export const handler = async (event) => {
                         text: [
                           `*Service:* ${service}`,
                           `*Region:* ${region}`,
+                          `*Account:* ${accountName(accountId)}`,
                           `*Event Code:* ${code}`,
                           "\n",
                           `*Started:* ${timeSince(new Date(startTs))} ago`,
