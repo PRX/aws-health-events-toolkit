@@ -39,7 +39,7 @@ Resources:
     Type: AWS::Events::EventBusPolicy
     Properties:
       EventBusName: !Ref MgmtSinkEventBus
-      StatementId: AllowEventsToCfnOrgSink
+      StatementId: AllowEventsToHealthSink
       Statement:
         Action: events:PutEvents
         Condition:
