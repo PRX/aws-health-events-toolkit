@@ -10,7 +10,7 @@ const GREEN = "#2eb886";
 const RED = "#a30200";
 
 function timeSince(date) {
-  const seconds = Math.floor((+new Date() - date) / 1000);
+  const seconds = Math.floor((Date.now() - date) / 1000);
 
   let interval = seconds / 86400;
   if (interval > 1) {
