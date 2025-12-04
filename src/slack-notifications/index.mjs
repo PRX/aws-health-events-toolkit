@@ -45,7 +45,7 @@ export const handler = async (event) => {
   const status = event.detail.statusCode;
   const description = event.detail.eventDescription[0].latestDescription;
 
-  if (scope === "PUBLIC" && category === "issue") {
+  if (["PUBLIC", "ACCOUNT_SPECIFIC"].includes(scope) && category === "issue") {
     const color = status === "closed" ? GREEN : RED;
 
     await eventbridge.send(
